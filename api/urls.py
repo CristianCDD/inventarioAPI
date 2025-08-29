@@ -1,13 +1,14 @@
-from django.urls import path, include  # Agrega 'include' aquí
+from django.urls import path, include
 from rest_framework import routers
 from api import views
 
 router = routers.DefaultRouter()
 
-# Registrar los viewsets en lugar de los serializadores
+# Registra los viewsets
 router.register(r'productos', views.ProductoViewSet)  # Registra el ProductoViewSet
-router.register(r'sedes', views.SedeViewSet)  # Registra el SedeViewSet
+router.register(r'movimientos', views.MovimientosViewSet)  # Registra el MovimientosViewSet
 
 urlpatterns = [
     path('', include(router.urls)),  # Incluye las rutas generadas por el router
+    path('listado/', views.ProductoList.as_view(), name='producto-listado'),  # Ruta para la vista personalizada
 ]
