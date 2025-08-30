@@ -62,3 +62,14 @@ class EliminarMovimientosPorProducto(APIView):
             Movimientos.objects.filter(producto_id=producto_id).delete()
             return Response({"message": "Movimientos eliminados correctamente"}, status=status.HTTP_204_NO_CONTENT)
         return Response({"error": "Producto no especificado"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class HistorialMovimientosPorProducto(APIView):
+    def get(self, request, id_producto, format=None):
+        # Filtrar los movimientos por producto y obtener las fechas
+        movimientos = Movimientos.objects.filter(producto_id=id_producto).values_list('fecha', flat=True)
+        
+        if not movimientos:
+            return Response({"message": "No se encontraron movimientos para este producto"}, status=status.HTTP_404_NOT_FOUND)
+        
+        return Response({"fechas_movimientos": list(movimientos)}, status=status.HTTP_200_OK)
