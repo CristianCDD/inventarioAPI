@@ -40,11 +40,24 @@ class ProductoList(APIView):
         result = []
         for producto in productos:
             producto_data = {
+                "id_producto": producto.id,
                 "nombre": producto.nombre,
                 "codigo": producto.codigo,
                 "stock": producto.stock_total,
-                "ultima_fecha_movimiento": producto.ultima_fecha_movimiento,
             }
             result.append(producto_data)
 
         return Response(result)
+    
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .models import Movimientos
+
+class EliminarMovimientosPorProducto(APIView):
+    def delete(self, request, *args, **kwargs):
+        producto_id = request.query_params.get('producto', None)
+        if producto_id:
+            Movimientos.objects.filter(producto_id=producto_id).delete()
+            return Response({"message": "Movimientos eliminados correctamente"}, status=status.HTTP_204_NO_CONTENT)
+        return Response({"error": "Producto no especificado"}, status=status.HTTP_400_BAD_REQUEST)
