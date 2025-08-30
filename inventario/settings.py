@@ -109,6 +109,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5500",
     "http://127.0.0.1:5173",   # Vite
     "http://localhost:5173",
+    "https://inventariod.netlify.app",
 ]
 
 # Si usas cookies/autenticación:
