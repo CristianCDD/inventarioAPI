@@ -44,6 +44,7 @@ class ProductoList(APIView):
                 "nombre": producto.nombre,
                 "codigo": producto.codigo,
                 "stock": producto.stock_total,
+                "ultima_fecha_movimiento": producto.ultima_fecha_movimiento
             }
             result.append(producto_data)
 
