@@ -73,8 +73,11 @@ class HistorialMovimientosPorProducto(APIView):
     http_method_names = ['get', 'patch']
 
     def get(self, request, id_producto, format=None):
-        movimientos_qs = Movimientos.objects.filter(producto_id=id_producto).values(
-            'id', 'fecha', 'tipo_movimiento', 'cantidad'
+        movimientos_qs = (
+            Movimientos.objects
+            .filter(producto_id=id_producto)
+            .order_by('-fecha', '-id')   # 👈 ORDEN: recientes primero (tie-break por id)
+            .values('id', 'fecha', 'tipo_movimiento', 'cantidad')
         )
 
         if not movimientos_qs.exists():
