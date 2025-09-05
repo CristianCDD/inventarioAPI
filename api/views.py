@@ -69,14 +69,18 @@ class EliminarMovimientosPorProducto(APIView):
 
 
 class HistorialMovimientosPorProducto(APIView):
-    # habilitamos solo GET y PATCH
-    http_method_names = ['get', 'patch']
+    # habilitamos GET, PATCH y DELETE
+    http_method_names = ['get', 'patch', 'delete']
 
     def get(self, request, id_producto, format=None):
+        """
+        Devuelve el historial de movimientos de un producto,
+        ordenados por fecha descendente (más recientes primero).
+        """
         movimientos_qs = (
             Movimientos.objects
             .filter(producto_id=id_producto)
-            .order_by('-fecha', '-id')   # 👈 ORDEN: recientes primero (tie-break por id)
+            .order_by('-fecha', '-id')   # 👈 ordenado: recientes primero
             .values('id', 'fecha', 'tipo_movimiento', 'cantidad')
         )
 
@@ -92,6 +96,9 @@ class HistorialMovimientosPorProducto(APIView):
         )
 
     def patch(self, request, id_producto, format=None):
+        """
+        Actualiza parcialmente un movimiento del producto.
+        """
         mov_id = request.data.get('id')
         if not mov_id:
             return Response(
@@ -127,3 +134,26 @@ class HistorialMovimientosPorProducto(APIView):
                 "cantidad": mov.cantidad
             }
         }, status=status.HTTP_200_OK)
+
+    def delete(self, request, id_producto, format=None):
+      
+        mov_id = request.data.get('id') or request.query_params.get('id')
+        if not mov_id:
+            return Response(
+                {"error": "Debes enviar el 'id' del movimiento a eliminar"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            mov = Movimientos.objects.get(id=mov_id, producto_id=id_producto)
+        except Movimientos.DoesNotExist:
+            return Response(
+                {"error": "Movimiento no encontrado para este producto"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        mov.delete()
+        return Response(
+            {"message": f"Movimiento {mov_id} eliminado correctamente"},
+            status=status.HTTP_200_OK
+        )
