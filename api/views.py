@@ -22,28 +22,28 @@ class MovimientosViewSet(viewsets.ModelViewSet):
 
 class ProductoList(APIView):
     def get(self, request, format=None):
-        productos = Producto.objects.annotate(
-            # Última fecha de movimiento
-            ultima_fecha_movimiento=Max('movimientos__fecha'),
+        
+        productos = (
+    Producto.objects
+    .annotate(
+        ultima_fecha_movimiento=Max('movimientos__fecha'),
+        entradas=Coalesce(Sum(
+            Case(
+                When(movimientos__tipo_movimiento='entrada', then=F('movimientos__cantidad')),
+                default=0
+            )
+        ), 0),
+        salidas=Coalesce(Sum(
+            Case(
+                When(movimientos__tipo_movimiento='salida', then=F('movimientos__cantidad')),
+                default=0
+            )
+        ), 0),
+    )
+    .annotate(stock_total=F('entradas') - F('salidas'))
+    .order_by('nombre')  
+)
 
-            # Entradas acumuladas
-            entradas=Coalesce(Sum(
-                Case(
-                    When(movimientos__tipo_movimiento='entrada', then=F('movimientos__cantidad')),
-                    default=0
-                )
-            ), 0),
-
-            # Salidas acumuladas
-            salidas=Coalesce(Sum(
-                Case(
-                    When(movimientos__tipo_movimiento='salida', then=F('movimientos__cantidad')),
-                    default=0
-                )
-            ), 0),
-        ).annotate(
-            stock_total=F('entradas') - F('salidas')
-        )
 
         result = []
         for p in productos:
@@ -80,7 +80,7 @@ class HistorialMovimientosPorProducto(APIView):
         movimientos_qs = (
             Movimientos.objects
             .filter(producto_id=id_producto)
-            .order_by('-fecha', '-id')   # 👈 ordenado: recientes primero
+            .order_by('-fecha', '-id')   
             .values('id', 'fecha', 'tipo_movimiento', 'cantidad')
         )
 
