@@ -4,7 +4,7 @@ from django.db import models
 class Producto(models.Model):
     id = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=100)
-    codigo = models.CharField(max_length=50)  # Usamos CharField si el código es alfanumérico
+    codigo = models.CharField(max_length=50, blank=True, null=True)  # opcional
 
     def __str__(self):
         return self.nombre
